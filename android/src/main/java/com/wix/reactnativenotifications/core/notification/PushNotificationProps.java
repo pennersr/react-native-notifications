@@ -20,6 +20,10 @@ public class PushNotificationProps {
         mBundle = bundle;
     }
 
+    public String getSound() {
+        return mBundle.getString("sound");
+    }
+
     public String getTitle() {
         return mBundle.getString("title");
     }

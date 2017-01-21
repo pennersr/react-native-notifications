@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Color;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -158,12 +162,16 @@ public class PushNotification implements IPushNotification {
         String CHANNEL_ID = "channel_01";
         String CHANNEL_NAME = "Channel Name";
 
+        String sound = mNotificationProps.getSound();
+        boolean isPositive = "trade_positive".equals(sound);
+        int icon = mContext.getResources().getIdentifier("ic_notification", "mipmap", mContext.getPackageName());
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
-                .setSmallIcon(mContext.getApplicationInfo().icon)
+                .setSound(Uri.parse("android.resource://" + mContext.getPackageName() + "/raw/" + sound))
                 .setContentIntent(intent)
-                .setDefaults(Notification.DEFAULT_ALL)
+                .setSmallIcon(icon)
+                .setLights(isPositive ? Color.GREEN : Color.RED, 500, 2000)
                 .setAutoCancel(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -174,7 +182,10 @@ public class PushNotification implements IPushNotification {
             notificationManager.createNotificationChannel(channel);
             notification.setChannelId(CHANNEL_ID);
         }
-        
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notification.setColor(Color.parseColor(isPositive ? "#4e9a06" : "#a40000"));
+        }
         return notification;
     }
 
