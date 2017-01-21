@@ -6,6 +6,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Color;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -135,14 +139,28 @@ public class PushNotification implements IPushNotification {
         return getNotificationBuilder(intent).build();
     }
 
-    protected Notification.Builder getNotificationBuilder(PendingIntent intent) {
-        return new Notification.Builder(mContext)
+    protected NotificationCompat.Builder getNotificationBuilder(PendingIntent intent) {
+        String sound = mNotificationProps.getSound();
+        boolean isPositive = "trade_positive".equals(sound);
+        int icon = mContext.getResources().getIdentifier("ic_notification", "mipmap", mContext.getPackageName());
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(mNotificationProps.getTitle());
+        bigTextStyle.bigText(mNotificationProps.getBody());
+        NotificationCompat.Builder builder =  new NotificationCompat.Builder(mContext)
+                .setStyle(bigTextStyle)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
                 .setSmallIcon(mContext.getApplicationInfo().icon)
+                .setSound(Uri.parse("android.resource://" + mContext.getPackageName() + "/raw/" + sound))
                 .setContentIntent(intent)
-                .setDefaults(Notification.DEFAULT_ALL)
+                .setSmallIcon(icon)
+                .setLights(isPositive ? Color.GREEN : Color.RED, 500, 2000)
                 .setAutoCancel(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setColor(Color.parseColor(isPositive ? "#4e9a06" : "#a40000"));
+        }
+        return builder;
     }
 
     protected int postNotification(Notification notification, Integer notificationId) {
