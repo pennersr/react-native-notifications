@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.os.Build;
 import android.graphics.Color;
 import android.net.Uri;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -23,6 +25,8 @@ import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
 
+import java.util.Locale;
+
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_FOREGROUND_EVENT_NAME;
@@ -30,6 +34,9 @@ import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_FOREGR
 public class PushNotification implements IPushNotification {
 
     final protected Context mContext;
+    private TextToSpeech tts;
+    private String textToSpeak;
+
     final protected AppLifecycleFacade mAppLifecycleFacade;
     final protected AppLaunchHelper mAppLaunchHelper;
     final protected JsIOHelper mJsIOHelper;
@@ -163,12 +170,16 @@ public class PushNotification implements IPushNotification {
         String CHANNEL_NAME = "Channel Name";
 
         String sound = mNotificationProps.getSound();
-        boolean isPositive = "trade_positive".equals(sound);
+        String lights = mNotificationProps.getLights();
+        boolean isPositive = "green".equals(lights);
+        boolean hasSound = sound != null && !"".equals(sound);
+        if (hasSound && sound.indexOf(':') < 0) {
+            sound = "android.resource://" + mContext.getPackageName() + "/raw/" + sound;
+        }
         int icon = mContext.getResources().getIdentifier("ic_notification", "mipmap", mContext.getPackageName());
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
-                .setSound(Uri.parse("android.resource://" + mContext.getPackageName() + "/raw/" + sound))
                 .setContentIntent(intent)
                 .setSmallIcon(icon)
                 .setLights(isPositive ? Color.GREEN : Color.RED, 500, 2000)
@@ -183,8 +194,18 @@ public class PushNotification implements IPushNotification {
             notification.setChannelId(CHANNEL_ID);
         }
 
+
+        if (hasSound) {
+            builder = builder.setSound(Uri.parse(sound));
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notification.setColor(Color.parseColor(isPositive ? "#4e9a06" : "#a40000"));
+        }
+
+        String speak = mNotificationProps.getTTS();
+        if (speak != null && !"".equals(speak)) {
+            new TTS(mContext, speak);
         }
         return notification;
     }
