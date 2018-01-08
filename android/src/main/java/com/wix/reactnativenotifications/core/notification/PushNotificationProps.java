@@ -24,6 +24,14 @@ public class PushNotificationProps {
         return mBundle.getString("sound");
     }
 
+    public String getTTS() {
+        return mBundle.getString("tts");
+    }
+
+    public String getLights() {
+        return mBundle.getString("lights");
+    }
+
     public String getTitle() {
         return mBundle.getString("title");
     }
