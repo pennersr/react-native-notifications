@@ -41,7 +41,7 @@ class TTS implements TextToSpeech.OnInitListener {
 
     @Override
     public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
+        if (engine != null && status == TextToSpeech.SUCCESS) {
             if (engine.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
                 engine.setLanguage(Locale.US);
             } else if (engine.isLanguageAvailable(Locale.ENGLISH) == TextToSpeech.LANG_AVAILABLE) {
