@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
+import android.media.AudioManager;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -205,7 +206,12 @@ public class PushNotification implements IPushNotification {
 
         String speak = mNotificationProps.getTTS();
         if (speak != null && !"".equals(speak)) {
-            new TTS(mContext, speak);
+            AudioManager audio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            if (audio != null) {
+                if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+                    new TTS(mContext, speak);
+                }
+            }
         }
         return notification;
     }
