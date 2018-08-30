@@ -1,5 +1,6 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import android.app.NotificationChannel;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +14,9 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 import android.media.AudioManager;
+import android.media.AudioAttributes;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -167,6 +171,7 @@ public class PushNotification implements IPushNotification {
                 .setSmallIcon(mContext.getApplicationInfo().icon)
                 .setContentIntent(intent)
                 .setSmallIcon(icon)
+                .setChannelId(mNotificationProps.getChannel())
                 .setLights(isPositive ? Color.GREEN : Color.RED, 500, 2000)
                 .setAutoCancel(true);
         if (hasSound) {
@@ -177,16 +182,19 @@ public class PushNotification implements IPushNotification {
         }
 
         String speak = mNotificationProps.getTTS();
-        if (speak != null && !"".equals(speak)) {
-            AudioManager audio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-            if (audio != null) {
-                if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-                    new TTS(mContext, speak);
-                }
-            }
+        if (speak != null && !"".equals(speak) && shouldRing()) {
+            new TTS(mContext, speak);
         }
         return builder;
+    }
 
+    private boolean shouldRing() {
+        boolean ret = true;
+        AudioManager audio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (audio != null) {
+            ret = (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL);
+        }
+        return ret;
     }
 
     protected int postNotification(Notification notification, Integer notificationId) {
