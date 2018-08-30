@@ -1,5 +1,6 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import android.app.NotificationChannel;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,6 +16,9 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 import android.media.AudioManager;
+import android.media.AudioAttributes;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -187,17 +191,12 @@ public class PushNotification implements IPushNotification {
                 .setAutoCancel(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                                                                  CHANNEL_NAME,
-                                                                  NotificationManager.IMPORTANCE_DEFAULT);
-            final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
-            notification.setChannelId(CHANNEL_ID);
+            notification.setChannelId(mNotificationProps.getChannel());
         }
 
 
         if (hasSound) {
-            builder = builder.setSound(Uri.parse(sound));
+            notification.setSound(Uri.parse(sound));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -205,15 +204,19 @@ public class PushNotification implements IPushNotification {
         }
 
         String speak = mNotificationProps.getTTS();
-        if (speak != null && !"".equals(speak)) {
-            AudioManager audio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-            if (audio != null) {
-                if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-                    new TTS(mContext, speak);
-                }
-            }
+        if (speak != null && !"".equals(speak) && shouldRing()) {
+            new TTS(mContext, speak);
         }
         return notification;
+    }
+
+    private boolean shouldRing() {
+        boolean ret = true;
+        AudioManager audio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (audio != null) {
+            ret = (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL);
+        }
+        return ret;
     }
 
     protected int postNotification(Notification notification, Integer notificationId) {
