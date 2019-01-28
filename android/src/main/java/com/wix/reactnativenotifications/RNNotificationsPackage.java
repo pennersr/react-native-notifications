@@ -14,8 +14,7 @@ import java.util.List;
 
 public class RNNotificationsPackage implements ReactPackage {
 
-
-    final Application mApplication;
+    private final Application mApplication;
 
     public RNNotificationsPackage(Application application) {
         mApplication = application;
