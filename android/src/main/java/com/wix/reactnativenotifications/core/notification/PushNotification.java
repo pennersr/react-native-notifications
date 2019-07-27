@@ -192,10 +192,7 @@ public class PushNotification implements IPushNotification {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification.setChannelId(mNotificationProps.getChannel());
-        }
-
-
-        if (hasSound) {
+        } else if (hasSound) {
             notification.setSound(Uri.parse(sound));
         }
 
