@@ -182,13 +182,19 @@ public class PushNotification implements IPushNotification {
             sound = "android.resource://" + mContext.getPackageName() + "/raw/" + sound;
         }
         int icon = mContext.getResources().getIdentifier("ic_notification", "mipmap", mContext.getPackageName());
+
+        Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
+        bigTextStyle.setBigContentTitle(mNotificationProps.getTitle());
+        bigTextStyle.bigText(mNotificationProps.getBody());
+
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
                 .setContentIntent(intent)
                 .setSmallIcon(icon)
                 .setLights(isPositive ? Color.GREEN : Color.RED, 500, 2000)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setStyle(bigTextStyle);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification.setChannelId(mNotificationProps.getChannel());
