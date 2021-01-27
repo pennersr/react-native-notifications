@@ -13,7 +13,7 @@ import android.os.Build;
 import android.graphics.Color;
 import android.net.Uri;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.widget.Toast;
 import android.media.AudioManager;
 import android.media.AudioAttributes;
